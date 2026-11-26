@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ReelNest - Privacy policy</title>
+<style>
+  body { background:#050a16; color:#e6ecf7; font-family:system-ui,sans-serif; line-height:1.6; margin:0; }
+  main { max-width:680px; margin:auto; padding:24px 16px 48px; }
+  h2 { margin-top:28px; font-size:1.15rem; }
+  a { color:#6ea8ff; }
+</style>
+</head>
+<body>
+<main>
+  <p><a href="index.html">← Back</a></p>
+  <h1><span class="site-name">ReelNest</span> privacy policy</h1>
+
+  <h2>Account information</h2>
+  <p>When you sign up, we collect your email address and the name you choose. If you use Google sign-in, Google also shares basic profile details, such as your name, email address and profile picture address. We never receive your Google password. Account details are stored using Supabase, which provides our sign-in service. Sign-up and log-in codes are sent through our email provider.</p>
+
+  <h2>Information on your device</h2>
+  <p>Your browser stores your sign-in session, your watch time, your finished videos and temporary sign-up details. If you sign up by email, those temporary details include your email address and name.</p>
+
+  <h2>YouTube videos</h2>
+  <p>Videos and their pictures come from YouTube. Google may collect information and use cookies when they load or play. By watching, you also agree to the <a href="https://www.youtube.com/t/terms">YouTube Terms of Service</a>. See the <a href="https://policies.google.com/privacy">Google Privacy Policy</a>.</p>
+
+  <h2>Advertising</h2>
+  <p>This site may show Google ads. When it does, third-party vendors, including Google, use cookies to serve ads based on your earlier visits to this and other websites. Google's advertising cookies let it and its partners serve ads based on those visits. You can turn off personalised advertising in <a href="https://adssettings.google.com/">Google Ads Settings</a>.</p>
+
+  <h2>Other services</h2>
+  <p>The website is hosted on GitHub Pages and loads its sign-in code from jsDelivr. These providers may receive technical information such as your IP address.</p>
+
+  <h2>Your choices</h2>
+  <p>You can reset your activity from your Profile page or clear your browser data. To see, correct or delete your account information, contact us at <a id="contact">[add your contact email in config.js]</a>.</p>
+</main>
+<script src="config.js"></script>
+<script>
+  const CFG = window.SITE || {};
+  if (CFG.name) document.querySelectorAll(".site-name").forEach(e => e.textContent = CFG.name);
+  if (CFG.contactEmail) {
+    const link = document.getElementById("contact");
+    link.textContent = CFG.contactEmail;
+    link.href = "mailto:" + CFG.contactEmail;
+  }
+</script>
+</body>
+</html>
