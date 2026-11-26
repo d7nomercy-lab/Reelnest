@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<title>ReelNest - Dashboard</title>
+<style>
+  :root { --bg:#050a16; --card:#0b1324; --line:#1d2c4c; --text:#fff; --muted:#a5b4cf; --accent:#6ea8ff; --mint:#a7f3d0;
+          --grad:linear-gradient(135deg,#3b82f6,#4f46e5 55%,#7c3aed); }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  [hidden] { display:none !important; }
+  body { background:var(--bg); color:var(--text); font-family:system-ui,sans-serif; line-height:1.4; padding-bottom:120px; }
+  body.loading > * { visibility:hidden; }
+  main, header { max-width:700px; margin:auto; padding:16px; }
+  button, input { font:inherit; }
+  button { cursor:pointer; }
+  .topbar { position:sticky; top:0; z-index:5; background:#050a16f2; border-bottom:1px solid var(--line); }
+  header { display:flex; align-items:center; gap:8px; }
+  .logo { display:flex; align-items:center; gap:8px; margin-right:auto; font-size:1.05rem; font-weight:800; min-width:0; overflow:hidden; }
+  .logo i { display:grid; place-items:center; flex-shrink:0; width:44px; height:44px; border-radius:14px; background:var(--grad); font-style:normal; font-size:.9rem; }
+  .icon-btn, .pill, .avatar { height:44px; flex-shrink:0; display:grid; place-items:center; }
+  .icon-btn, .pill { border-radius:14px; border:1px solid var(--line); background:var(--card); color:var(--muted); }
+  .icon-btn { width:44px; }
+  .pill { padding:0 10px; color:var(--mint); border-color:#14463f; font-weight:700; font-size:.85rem; white-space:nowrap; }
+  .avatar { width:44px; border-radius:50%; background:var(--grad); color:#fff; border:0; font-weight:700; }
+  svg { width:24px; height:24px; fill:none; stroke:currentColor; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; }
+  .muted { color:var(--muted); }
+  .eyebrow { color:var(--accent); font-weight:700; font-size:.85rem; letter-spacing:.18em; text-transform:uppercase; }
+  h1 { font-size:2.5rem; margin:2px 0; overflow-wrap:anywhere; }
+  h2 { font-size:1.3rem; margin:8px 0 12px; }
+  .notice { background:#172554; border:1px solid #3b5bdb; border-radius:14px; padding:12px; margin-bottom:16px; }
+  .btn { display:inline-block; background:var(--grad); color:#fff; border:1px solid #5b8cf7; border-radius:14px; padding:13px 22px; font-weight:700; text-decoration:none; box-shadow:0 8px 24px #3b5bf640; }
+  .btn.plain { background:var(--card); border-color:var(--line); box-shadow:none; }
+  .hero-btn { margin-top:18px; }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:20px; overflow:hidden; margin-top:16px; }
+  .card img { width:100%; aspect-ratio:16/9; object-fit:cover; display:block; }
+  .card .body { padding:16px; }
+  .card p { margin:4px 0 12px; }
+  #nextVideo .card { position:relative; display:flex; align-items:flex-end; min-height:380px; margin-top:24px; }
+  #nextVideo .card img { position:absolute; inset:0; height:100%; aspect-ratio:auto; opacity:.65; }
+  #nextVideo .card .body { position:relative; width:100%; padding:100px 24px 28px; background:linear-gradient(transparent,#050a16f5 65%); }
+  #nextVideo .card .body::before { content:"WATCH NEXT"; color:var(--accent); font-weight:700; font-size:.85rem; letter-spacing:.18em; }
+  #nextVideo h3 { font-size:1.9rem; margin-top:8px; }
+  .time-card { padding:24px; background:linear-gradient(135deg,#0c1f2c,#0a1830); border-color:#14463f; }
+  .time-card strong { display:block; color:var(--mint); font-size:2.6rem; margin-top:8px; }
+  .count { padding:16px 24px; }
+  .count strong { display:block; font-size:1.6rem; }
+  #adBox { margin-top:40px; min-height:110px; text-align:center; font-size:.75rem; color:var(--muted); }
+  .ad-placeholder { border:2px dashed var(--line); border-radius:14px; padding:36px 12px; margin-top:4px; font-size:.95rem; }
+  .field { width:100%; padding:13px; border-radius:12px; border:1px solid var(--line); background:var(--card); color:#fff; }
+  .chips { display:flex; gap:8px; margin-top:12px; }
+  .chips button { background:var(--card); color:var(--muted); border:1px solid var(--line); border-radius:99px; padding:8px 18px; }
+  .chips button.active { background:var(--grad); color:#fff; }
+  .actions { display:flex; gap:10px; flex-wrap:wrap; margin-top:14px; }
+  nav { position:fixed; bottom:0; left:0; right:0; z-index:6; display:flex; background:#070d1cf7; border-top:1px solid var(--line); }
+  nav button { flex:1; display:flex; flex-direction:column; align-items:center; gap:4px; padding:10px 4px 16px; background:none; border:0; border-top:3px solid transparent; color:var(--muted); font-size:.85rem; }
+  nav button i { display:grid; place-items:center; width:48px; height:38px; border-radius:12px; border:1px solid transparent; }
+  nav button.active { color:#fff; border-top-color:#4f7df9; }
+  nav button.active i { color:var(--accent); background:#12213f; border-color:var(--line); }
+  .help { position:fixed; right:16px; bottom:100px; z-index:6; width:58px; height:58px; border-radius:18px; background:var(--card); color:#fff; border:2px solid #a855f7; font-size:1.4rem; }
+  #player { position:fixed; inset:0; background:#02050cfa; z-index:10; overflow-y:auto; display:flex; flex-direction:column; padding:16px 12px; }
+  .player-inner { width:100%; max-width:900px; margin:auto; text-align:center; }
+  #frameWrap { width:100%; aspect-ratio:16/9; margin:12px auto; background:#000; }
+  #frameWrap.vertical { width:min(100%, 39vh); aspect-ratio:9/16; }
+  #frameWrap iframe { width:100%; height:100%; border:0; display:block; }
+  .player-inner .actions { justify-content:center; }
+  footer { margin-top:32px; text-align:center; font-size:.8rem; }
+  footer a { color:var(--accent); }
+</style>
+</head>
+<body class="loading">
+
+<div class="topbar">
+<header>
+  <div class="logo"><i>▶</i> <span class="site-name">ReelNest</span></div>
+  <button class="icon-btn" id="searchBtn" aria-label="Search videos"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m21 21-5-5"/></svg></button>
+  <div class="pill" id="timePill" title="Watch time">0.0 min</div>
+  <button class="avatar" id="avatar" aria-label="Open profile">GU</button>
+</header>
+</div>
+
+<main>
+  <p class="notice" id="previewNotice" hidden>Preview mode: sign-in isn't connected yet.</p>
+
+  <section id="home">
+    <p class="eyebrow" id="greeting"></p>
+    <h1 id="userName">Guest</h1>
+    <p class="muted">Here's your watching overview.</p>
+    <button class="btn hero-btn" id="shortsBtn">▷&nbsp; Watch shorts</button>
+    <div id="nextVideo"></div>
+    <div class="card time-card"><span class="muted">Total watch time</span><strong id="watchTime">0.0 min</strong></div>
+    <div class="card count"><span class="muted">Videos finished</span><strong id="watchCount">0</strong></div>
+    <aside id="adBox" hidden>Advertisement</aside>
+  </section>
+
+  <section id="library" hidden>
+    <h2>Watch</h2>
+    <input class="field" id="search" type="search" placeholder="Search videos..." aria-label="Search videos">
+    <div class="chips">
+      <button data-filter="all" class="active">All</button>
+      <button data-filter="short">Shorts</button>
+      <button data-filter="film">Films</button>
+    </div>
+    <div id="videoList"></div>
+  </section>
+
+  <section id="history" hidden>
+    <h2>Finished videos</h2>
+    <div id="historyList"></div>
+  </section>
+
+  <section id="profile" hidden>
+    <h2>Profile</h2>
+    <p class="muted" id="accountInfo"></p><br>
+    <input class="field" id="nameInput" maxlength="30" placeholder="Your name" aria-label="Your name">
+    <div class="actions">
+      <button class="btn" id="saveName">Save name</button>
+      <button class="btn plain" id="reset">Reset activity</button>
+      <button class="btn plain" id="logout">Log out</button>
+    </div>
+    <p class="muted" style="margin-top:16px">Watch time and history are saved on this device only.</p>
+  </section>
+
+  <footer class="muted">
+    Videos play through YouTube. The starter videos are Blender open movies.<br>
+    <a href="privacy.html">Privacy policy</a>
+  </footer>
+</main>
+
+<button class="help" id="helpBtn" aria-label="Help">?</button>
+
+<nav>
+  <button data-page="home" class="active"><i><svg viewBox="0 0 24 24"><path d="M3 11 12 3l9 8M5 10v11h14V10M10 21v-6h4v6"/></svg></i>Dashboard</button>
+  <button data-page="library"><i><svg viewBox="0 0 24 24"><path d="M7 4v16l13-8z"/></svg></i>Watch</button>
+  <button data-page="history"><i><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l4 2"/></svg></i>History</button>
+  <button data-page="profile"><i><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg></i>Profile</button>
+</nav>
+
+<div id="player" hidden>
+  <div class="player-inner">
+    <h2 id="playerTitle"></h2>
+    <div id="frameWrap"><div id="ytTarget"></div></div>
+    <p class="muted" id="playerMsg" role="status"></p>
+    <div class="actions">
+      <button class="btn" id="nextBtn">Next video</button>
+      <a class="btn plain" id="ytLink" target="_blank" rel="noopener">Watch on YouTube</a>
+      <button class="btn plain" id="closeBtn">Close</button>
+    </div>
+  </div>
+</div>
+
+<script src="config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.100.0/dist/umd/supabase.js"></script>
+<script>
+const $ = (id) => document.getElementById(id);
+const CFG = window.SITE || {};
+const LIVE = Boolean(CFG.supabaseUrl && CFG.supabaseKey);
+
+// Turns any YouTube link (watch, youtu.be, shorts) into a playable video
+function readVideo(item) {
+  const link = String(item.link || "").trim();
+  const match = link.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?(?:.*&)?v=|shorts\/|embed\/))([\w-]{11})/);
+  const id = match ? match[1] : (/^[\w-]{11}$/.test(link) ? link : null);
+  if (!id) return null;
+  const vertical = link.includes("/shorts/");
+  return { ...item, id, vertical, short: Boolean(item.short) || vertical };
+}
+const VIDEOS = (CFG.videos || []).map(readVideo).filter(Boolean);
+
+let sb = null, user = null, storeKey = "reelnest:preview", filter = "all";
+let data = { name: "Guest", seconds: 0, finished: [] };
+
+function save() {
+  try { localStorage.setItem(storeKey, JSON.stringify(data)); } catch (e) {}
+}
+
+function videoCard(v) {
+  const card = document.createElement("div");
+  card.className = "card";
+  card.innerHTML = `
+    <img src="https://i.ytimg.com/vi/${v.id}/hqdefault.jpg" alt="">
+    <div class="body">
+      <h3></h3>
+      <p class="muted"></p>
+      <button class="btn">Start watching</button>
+    </div>`;
+  card.querySelector("img").onerror = (e) => e.target.style.visibility = "hidden";
+  card.querySelector("h3").textContent = v.title;
+  card.querySelector("p").textContent = (v.type || "Video") + (v.short ? " • Short" : "");
+  card.querySelector("button").onclick = () => openPlayer(v);
+  return card;
+}
+
+function fillList(element, videos, emptyText) {
+  element.replaceChildren(...videos.map(videoCard));
+  if (!videos.length) {
+    const p = document.createElement("p");
+    p.className = "muted";
+    p.style.marginTop = "16px";
+    p.textContent = emptyText;
+    element.append(p);
+  }
+}
+
+function renderLibrary() {
+  const query = $("search").value.trim().toLowerCase();
+  const matches = VIDEOS.filter(v =>
+    (filter === "all" || (filter === "short") === v.short) &&
+    (v.title + " " + (v.type || "")).toLowerCase().includes(query));
+  fillList($("videoList"), matches, "No videos found.");
+}
+
+function renderStats() {
+  $("watchTime").textContent = $("timePill").textContent = (data.seconds / 60).toFixed(1) + " min";
+  $("watchCount").textContent = data.finished.length;
+}
+
+function render() {
+  const hour = new Date().getHours();
+  $("greeting").textContent = hour < 12 ? "Good morning" : hour < 18 ? "Good afternoon" : "Good evening";
+  $("userName").textContent = data.name;
+  $("avatar").textContent = data.name.slice(0, 2).toUpperCase();
+  $("nameInput").value = data.name;
+  const next = VIDEOS.find(v => !data.finished.includes(v.id)) || VIDEOS[0];
+  fillList($("nextVideo"), next ? [next] : [], "Add a video in config.js to get started.");
+  fillList($("historyList"), VIDEOS.filter(v => data.finished.includes(v.id)), "Nothing finished yet.");
+  renderLibrary();
+  renderStats();
+}
+
+function showPage(page) {
+  ["home", "library", "history", "profile"].forEach(id => $(id).hidden = id !== page);
+  document.querySelectorAll("nav button").forEach(b =>
+    b.classList.toggle("active", b.dataset.page === page));
+  window.scrollTo(0, 0);
+}
+
+function setFilter(next) {
+  filter = next;
+  document.querySelectorAll(".chips button").forEach(b =>
+    b.classList.toggle("active", b.dataset.filter === next));
+  renderLibrary();
+}
+
+// ---------- Video player ----------
+let player = null, timer = null, backupTimer = null, current = null, apiReady = false;
+
+window.onYouTubeIframeAPIReady = () => {
+  apiReady = true;
+  // Start the waiting video, unless the backup player is already showing
+  if (current && !player && $("ytTarget")) {
+    clearTimeout(backupTimer);
+    createPlayer(current);
+  }
+};
+
+function stopTimer() {
+  clearInterval(timer);
+  timer = null;
+}
+
+function clearPlayer() {
+  stopTimer();
+  clearTimeout(backupTimer);
+  if (player) player.destroy();
+  player = null;
+  $("frameWrap").innerHTML = '<div id="ytTarget"></div>';
+  $("playerMsg").textContent = "";
+}
+
+function createPlayer(v) {
+  const playerVars = { autoplay: 1, playsinline: 1, rel: 0 };
+  if (location.protocol.startsWith("http")) playerVars.origin = location.origin;
+  player = new YT.Player("ytTarget", {
+    videoId: v.id,
+    width: "100%",
+    height: "100%",
+    playerVars,
+    events: {
+      onError: () => {
+        $("playerMsg").textContent = "This video can't play here. Tap Watch on YouTube.";
+      },
+      onStateChange: (event) => {
+        stopTimer();
+        if (event.data === YT.PlayerState.PLAYING) {
+          timer = setInterval(() => { data.seconds++; save(); renderStats(); }, 1000);
+        }
+        // Counts a video once it reaches the end
+        if (event.data === YT.PlayerState.ENDED) {
+          if (!data.finished.includes(v.id)) data.finished.push(v.id);
+          save();
+          render();
+          $("playerMsg").textContent = "Finished. Tap Next video to keep watching.";
+        }
+      }
+    }
+  });
+}
+
+// Used if YouTube's player script doesn't load
+function showBackupPlayer(v) {
+  const frame = document.createElement("iframe");
+  frame.src = `https://www.youtube.com/embed/${v.id}?playsinline=1&rel=0`;
+  frame.title = v.title;
+  frame.allow = "autoplay; encrypted-media; picture-in-picture; fullscreen";
+  frame.allowFullscreen = true;
+  $("frameWrap").replaceChildren(frame);
+  $("playerMsg").textContent = "Using the basic player. Watch time isn't counted for this video.";
+}
+
+function openPlayer(v) {
+  clearPlayer();
+  current = v;
+  $("player").hidden = false;
+  $("playerTitle").textContent = v.title;
+  $("ytLink").href = "https://www.youtube.com/watch?v=" + v.id;
+  $("frameWrap").classList.toggle("vertical", v.vertical);
+  if (apiReady) createPlayer(v);
+  else backupTimer = setTimeout(() => showBackupPlayer(v), 5000);
+}
+
+function closePlayer() {
+  clearPlayer();
+  current = null;
+  $("player").hidden = true;
+  render();
+}
+
+function nextVideo() {
+  // Shorts continue to the next short; films continue to the next film
+  const group = VIDEOS.filter(v => v.short === current.short);
+  openPlayer(group[(group.indexOf(current) + 1) % group.length]);
+}
+
+// ---------- Ads ----------
+function setupAds() {
+  const box = $("adBox");
+  if (!LIVE) {
+    const sample = document.createElement("div");
+    sample.className = "ad-placeholder";
+    sample.textContent = "Your ad will go here";
+    box.append(sample);
+    box.hidden = false;
+    return;
+  }
+  if (!CFG.adsenseClient || !CFG.adsenseSlot) return;
+  const ad = document.createElement("ins");
+  ad.className = "adsbygoogle";
+  ad.style.display = "block";
+  ad.dataset.adClient = CFG.adsenseClient;
+  ad.dataset.adSlot = CFG.adsenseSlot;
+  ad.dataset.adFormat = "auto";
+  ad.dataset.fullWidthResponsive = "true";
+  box.append(ad);
+  box.hidden = false;
+  $("helpBtn").hidden = true; // floating buttons must not cover ads
+  const script = document.createElement("script");
+  script.async = true;
+  script.crossOrigin = "anonymous";
+  script.src = "https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=" + encodeURIComponent(CFG.adsenseClient);
+  document.head.append(script);
+  (window.adsbygoogle = window.adsbygoogle || []).push({});
+}
+
+// ---------- Buttons ----------
+document.querySelectorAll("nav button").forEach(b => b.onclick = () => showPage(b.dataset.page));
+document.querySelectorAll(".chips button").forEach(b => b.onclick = () => setFilter(b.dataset.filter));
+$("avatar").onclick = () => showPage("profile");
+$("shortsBtn").onclick = () => { setFilter("short"); showPage("library"); };
+$("searchBtn").onclick = () => { setFilter("all"); showPage("library"); $("search").focus(); };
+$("helpBtn").onclick = () => alert("Open Watch to pick a video. Change your name or log out under Profile.");
+$("search").oninput = renderLibrary;
+$("closeBtn").onclick = closePlayer;
+$("nextBtn").onclick = nextVideo;
+
+$("saveName").onclick = async () => {
+  const name = $("nameInput").value.trim() || "Guest";
+  if (sb) {
+    const { error } = await sb.auth.updateUser({ data: { display_name: name } });
+    if (error) return alert("Couldn't save your name: " + error.message);
+  }
+  data.name = name;
+  save();
+  render();
+  showPage("home");
+};
+
+$("reset").onclick = () => {
+  if (!confirm("Clear your watch time and history?")) return;
+  data.seconds = 0;
+  data.finished = [];
+  save();
+  render();
+};
+
+$("logout").onclick = async () => {
+  if (sb) await sb.auth.signOut();
+  location.replace("index.html");
+};
+
+// ---------- Start ----------
+async function start() {
+  if (CFG.name) {
+    document.querySelectorAll(".site-name").forEach(e => e.textContent = CFG.name);
+    document.title = CFG.name + " - Dashboard";
+  }
+  if (LIVE) {
+    try {
+      sb = window.supabase.createClient(CFG.supabaseUrl, CFG.supabaseKey, { auth: { flowType: "pkce" } });
+      const { data: { session } } = await sb.auth.getSession();
+      user = session && session.user;
+    } catch (e) {}
+    // Visitors must sign up or log in first
+    if (!user || !user.user_metadata.registered) return location.replace("index.html");
+    storeKey = "reelnest:" + user.id;
+  }
+  try { data = { ...data, ...JSON.parse(localStorage.getItem(storeKey) || "{}") }; } catch (e) {}
+  if (user) data.name = user.user_metadata.display_name || "Guest";
+  $("accountInfo").textContent = user ? "Signed in as " + user.email : "Preview account";
+  $("previewNotice").hidden = LIVE;
+  $("logout").textContent = user ? "Log out" : "Back to welcome page";
+  render();
+  document.body.classList.remove("loading");
+  setupAds();
+}
+
+start();
+</script>
+<script src="https://www.youtube.com/iframe_api"></script>
+</body>
+</html>
