@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ReelNest - Sign up or log in</title>
+<style>
+  :root { --bg:#050a16; --card:#0b1324; --line:#1d2c4c; --text:#fff; --muted:#a5b4cf; --accent:#6ea8ff;
+          --grad:linear-gradient(135deg,#3b82f6,#4f46e5 55%,#7c3aed); }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  [hidden] { display:none !important; }
+  body { background:radial-gradient(circle at 50% 0,#14234a,var(--bg) 55%) fixed var(--bg); color:var(--text); font-family:system-ui,sans-serif; line-height:1.5; }
+  main { max-width:440px; margin:auto; padding:32px 16px; }
+  .logo { display:flex; align-items:center; justify-content:center; gap:10px; font-size:1.4rem; font-weight:800; }
+  .logo i { display:grid; place-items:center; width:48px; height:48px; border-radius:14px; background:var(--grad); font-style:normal; font-size:1rem; }
+  .intro { text-align:center; margin:20px 0; }
+  .intro h1 { font-size:1.8rem; line-height:1.25; margin-bottom:6px; }
+  .muted { color:var(--muted); }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:20px; padding:20px; }
+  button, input { font:inherit; }
+  button { cursor:pointer; }
+  button:disabled { opacity:.55; cursor:wait; }
+  .btn, .google, .gmail { display:block; width:100%; border-radius:14px; padding:14px; font-weight:700; text-align:center; text-decoration:none; }
+  .btn { background:var(--grad); color:#fff; border:1px solid #5b8cf7; margin-top:16px; }
+  .google { background:#fff; color:#1f1f1f; border:1px solid #dadce0; }
+  .gmail { color:#fff; border:1px solid var(--line); margin-top:14px; }
+  .or { text-align:center; margin:16px 0; color:var(--muted); }
+  .tabs { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+  .tabs button { background:none; color:var(--muted); border:1px solid var(--line); border-radius:12px; padding:10px; }
+  .tabs button.active { color:#fff; background:#162750; border-color:#4f7df9; }
+  label { display:block; margin-top:14px; font-size:.9rem; color:var(--muted); }
+  input[type=text], input[type=email] { width:100%; margin-top:4px; padding:13px; border-radius:12px; border:1px solid var(--line); background:#050b18; color:#fff; }
+  #code { text-align:center; font-size:1.7rem; letter-spacing:.3em; }
+  .check { display:flex; gap:10px; align-items:flex-start; }
+  .check input { margin-top:4px; width:18px; height:18px; flex-shrink:0; }
+  a, .link { color:var(--accent); }
+  .link { background:none; border:0; margin-top:14px; width:100%; }
+  h2 { margin-bottom:6px; }
+  #message { margin-top:14px; padding:12px; border-radius:12px; background:#172554; border:1px solid #3b5bdb; }
+  #message.error { background:#3b1219; border-color:#b4404f; }
+  footer { text-align:center; margin-top:20px; font-size:.85rem; }
+</style>
+</head>
+<body>
+<main>
+  <div class="logo"><i>▶</i> <span class="site-name">ReelNest</span></div>
+
+  <div class="intro">
+    <h1>Short films, all in one place</h1>
+    <p class="muted">Create a free account to start watching.</p>
+  </div>
+
+  <!-- Shown only before you connect Supabase -->
+  <div class="card" id="setupBox" hidden style="margin-bottom:16px">
+    <p><strong>Preview mode.</strong> Sign-in isn't connected yet.</p>
+    <a class="btn" href="dashboard.html">Preview the dashboard</a>
+  </div>
+
+  <!-- STEP 1: sign up or log in -->
+  <section class="card" id="stepStart">
+    <button class="google" id="googleBtn" type="button">Continue with Google</button>
+    <p class="or">or use your email</p>
+    <div class="tabs">
+      <button type="button" id="tabSignup" class="active">Sign up</button>
+      <button type="button" id="tabLogin">Log in</button>
+    </div>
+    <form id="emailForm">
+      <label id="nameRow">Your name
+        <input type="text" id="name" maxlength="30" autocomplete="name">
+      </label>
+      <label>Email address
+        <input type="email" id="email" required autocomplete="email" placeholder="you@gmail.com">
+      </label>
+      <label class="check" id="agreeRow">
+        <input type="checkbox" id="agree">
+        <span>I agree to the <a href="privacy.html">privacy policy</a>.</span>
+      </label>
+      <button class="btn" id="sendBtn">Send my sign-up code</button>
+    </form>
+  </section>
+
+  <!-- STEP 2: enter the emailed code -->
+  <section class="card" id="stepCode" hidden>
+    <h2>Check your email</h2>
+    <p class="muted">We sent a code to <strong id="sentTo"></strong>. Look in Spam too.</p>
+    <a class="gmail" id="gmailLink" href="https://mail.google.com/" target="_blank" rel="noopener">Open Gmail ↗</a>
+    <form id="codeForm">
+      <label>Code from the email
+        <input type="text" id="code" inputmode="numeric" autocomplete="one-time-code" maxlength="10" required>
+      </label>
+      <button class="btn" id="verifyBtn">Verify and continue</button>
+    </form>
+    <button class="link" type="button" id="resendBtn">Send a new code</button>
+    <button class="link" type="button" id="backBtn">Use a different email</button>
+  </section>
+
+  <!-- STEP 3: finish creating the account -->
+  <section class="card" id="stepFinish" hidden>
+    <h2>Finish signing up</h2>
+    <p class="muted">Signed in as <strong id="finishEmail"></strong></p>
+    <form id="finishForm">
+      <label>Name to show on your dashboard
+        <input type="text" id="finishName" maxlength="30" required>
+      </label>
+      <label class="check">
+        <input type="checkbox" required>
+        <span>I agree to the <a href="privacy.html">privacy policy</a>.</span>
+      </label>
+      <button class="btn" id="finishBtn">Create my account</button>
+    </form>
+    <button class="link" type="button" id="cancelBtn">Use a different account</button>
+  </section>
+
+  <p id="message" role="status" hidden></p>
+  <footer><a href="privacy.html">Privacy policy</a></footer>
+</main>
+
+<script src="config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.100.0/dist/umd/supabase.js"></script>
+<script>
+const $ = (id) => document.getElementById(id);
+const CFG = window.SITE || {};
+const LIVE = Boolean(CFG.supabaseUrl && CFG.supabaseKey);
+const PENDING = "reelnest:pending";
+const HERE = location.origin + location.pathname;
+
+let sb = null, mode = "signup", pending = null, cooldown = null;
+
+if (CFG.name) document.querySelectorAll(".site-name").forEach(e => e.textContent = CFG.name);
+
+function say(text, isError) {
+  $("message").textContent = text || "";
+  $("message").hidden = !text;
+  $("message").classList.toggle("error", Boolean(isError));
+}
+
+function showStep(step) {
+  ["stepStart", "stepCode", "stepFinish"].forEach(id => $(id).hidden = id !== step);
+}
+
+function setMode(next) {
+  mode = next;
+  const signup = mode === "signup";
+  $("tabSignup").classList.toggle("active", signup);
+  $("tabLogin").classList.toggle("active", !signup);
+  $("nameRow").hidden = $("agreeRow").hidden = !signup;
+  $("name").required = $("agree").required = signup;
+  $("sendBtn").textContent = signup ? "Send my sign-up code" : "Send my log-in code";
+  say("");
+}
+
+// Phones may reload this page while you are in Gmail, so remember the step.
+function savePending() {
+  try { localStorage.setItem(PENDING, JSON.stringify(pending)); } catch (e) {}
+}
+function readPending() {
+  try {
+    const p = JSON.parse(localStorage.getItem(PENDING));
+    return p && Date.now() - p.sentAt < 3600000 ? p : null;
+  } catch (e) { return null; }
+}
+function clearPending() {
+  pending = null;
+  try { localStorage.removeItem(PENDING); } catch (e) {}
+}
+
+function startCooldown() {
+  clearInterval(cooldown);
+  const tick = () => {
+    const left = Math.ceil((pending ? pending.sentAt + 60000 - Date.now() : 0) / 1000);
+    $("resendBtn").disabled = left > 0;
+    $("resendBtn").textContent = left > 0 ? `Send a new code in ${left}s` : "Send a new code";
+    if (left <= 0) clearInterval(cooldown);
+  };
+  tick();
+  cooldown = setInterval(tick, 1000);
+}
+
+function showCodeStep() {
+  $("sentTo").textContent = pending.email;
+  $("gmailLink").hidden = !/@(gmail|googlemail)\.com$/i.test(pending.email);
+  showStep("stepCode");
+  startCooldown();
+}
+
+async function sendCode(email, name, how) {
+  const options = { shouldCreateUser: how === "signup" };
+  if (how === "signup") options.data = { display_name: name };
+  const { error } = await sb.auth.signInWithOtp({ email, options });
+  if (error) throw error;
+  pending = { email, name, mode: how, sentAt: Date.now() };
+  savePending();
+}
+
+function friendly(error, how) {
+  const text = (error && error.message) || "Something went wrong.";
+  if (how === "login" && /signups not allowed/i.test(text))
+    return "We couldn't find an account for that email. Tap Sign up first.";
+  if (/rate limit|only request this after|security purposes/i.test(text))
+    return "Too many requests. Please wait a little and try again.";
+  return text;
+}
+
+// Disables a button while a request is running
+async function busy(button, work, how) {
+  button.disabled = true;
+  say("");
+  try { await work(); }
+  catch (error) { say(friendly(error, how), true); }
+  finally { button.disabled = false; }
+}
+
+function afterSignIn(user) {
+  if (user.user_metadata.registered) {
+    clearPending();
+    location.replace("dashboard.html");
+    return;
+  }
+  const meta = user.user_metadata;
+  $("finishEmail").textContent = user.email;
+  $("finishName").value = (meta.display_name || meta.full_name || meta.name || "").slice(0, 30);
+  showStep("stepFinish");
+}
+
+async function register(name) {
+  const { error } = await sb.auth.updateUser({ data: { display_name: name, registered: true } });
+  if (error) throw error;
+  clearPending();
+  location.replace("dashboard.html");
+}
+
+function ready() {
+  if (sb) return true;
+  say("Sign-in isn't connected yet. Follow the steps in the README, or use the preview.", true);
+  return false;
+}
+
+$("tabSignup").onclick = () => setMode("signup");
+$("tabLogin").onclick = () => setMode("login");
+
+$("googleBtn").onclick = () => {
+  if (!ready()) return;
+  busy($("googleBtn"), async () => {
+    // Opens Google's own sign-in page, then returns here
+    const { error } = await sb.auth.signInWithOAuth({
+      provider: "google",
+      options: { redirectTo: HERE, queryParams: { prompt: "select_account" } }
+    });
+    if (error) throw error;
+  });
+};
+
+$("emailForm").onsubmit = (event) => {
+  event.preventDefault();
+  if (!ready()) return;
+  const how = mode;
+  const email = $("email").value.trim().toLowerCase();
+  const name = $("name").value.trim();
+  if (how === "signup" && !name) return say("Please enter your name.", true);
+  busy($("sendBtn"), async () => {
+    await sendCode(email, name, how);
+    $("code").value = "";
+    showCodeStep();
+  }, how);
+};
+
+$("codeForm").onsubmit = (event) => {
+  event.preventDefault();
+  busy($("verifyBtn"), async () => {
+    const token = $("code").value.replace(/\D/g, "");
+    const { data, error } = await sb.auth.verifyOtp({ email: pending.email, token, type: "email" });
+    if (error) throw error;
+    // A new sign-up already gave a name and agreed to the policy
+    if (pending.mode === "signup" && !data.user.user_metadata.registered) await register(pending.name);
+    else afterSignIn(data.user);
+  });
+};
+
+$("resendBtn").onclick = async () => {
+  await busy($("resendBtn"), async () => {
+    await sendCode(pending.email, pending.name, pending.mode);
+    say("A new code is on its way. Use the newest one.");
+  }, pending.mode);
+  startCooldown();
+};
+
+$("backBtn").onclick = () => { clearPending(); say(""); showStep("stepStart"); };
+
+$("finishForm").onsubmit = (event) => {
+  event.preventDefault();
+  const name = $("finishName").value.trim();
+  if (!name) return say("Please enter your name.", true);
+  busy($("finishBtn"), () => register(name));
+};
+
+$("cancelBtn").onclick = async () => {
+  await sb.auth.signOut();
+  clearPending();
+  showStep("stepStart");
+};
+
+async function start() {
+  setMode("signup");
+  if (!LIVE) { $("setupBox").hidden = false; return; }
+  try {
+    // Read any error Google sent back, before the address is cleaned up
+    const returned = new URLSearchParams(location.search || location.hash.slice(1));
+    const problem = returned.get("error_description");
+    sb = window.supabase.createClient(CFG.supabaseUrl, CFG.supabaseKey, { auth: { flowType: "pkce" } });
+    const { data: { session } } = await sb.auth.getSession();
+    if (session) return afterSignIn(session.user);
+    pending = readPending();
+    if (pending) showCodeStep();
+    if (problem) say(problem, true);
+  } catch (error) {
+    say("Couldn't start sign-in. Check your internet connection and the settings in config.js, then reload.", true);
+  }
+}
+
+start();
+</script>
+</body>
+</html>
